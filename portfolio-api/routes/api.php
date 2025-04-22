@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\API\Auth\AuthController;
+use App\Http\Controllers\API\Blog\BlogCategoryController;
+use App\Http\Controllers\API\Blog\BlogPostController;
 use App\Http\Controllers\API\Portfolio\ContactController;
 use App\Http\Controllers\API\Portfolio\EducationController;
 use App\Http\Controllers\API\Portfolio\ExperienceController;
 use App\Http\Controllers\API\Portfolio\ProjectController;
+use App\Http\Controllers\API\Portfolio\ProjectImageController;
 use App\Http\Controllers\API\Portfolio\SettingController;
 use App\Http\Controllers\API\Portfolio\SkillController;
 use App\Http\Controllers\API\Portfolio\TestimonialController;
@@ -95,6 +98,33 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 
+    // 📸 Project Images
+    Route::prefix('project-images')->group(function () {
+        Route::get('/projects/{project}/images', [ProjectImageController::class, 'index']);
+        Route::post('/', [ProjectImageController::class, 'store']);
+        Route::delete('/{projectImage}', [ProjectImageController::class, 'destroy']);
+    });
+
+
+    // BLOG CATEGORIES ROUTES (grouped)
+    Route::prefix('blog-categories')->group(function () {
+        Route::get('/', [BlogCategoryController::class, 'index']);
+        Route::post('/', [BlogCategoryController::class, 'store']);
+        Route::get('/{blogCategory}', [BlogCategoryController::class, 'show']);
+        Route::put('/{blogCategory}', [BlogCategoryController::class, 'update']);
+        Route::delete('/{blogCategory}', [BlogCategoryController::class, 'destroy']);
+    });
+
+
+    // BLOG POSTS ROUTES (grouped)
+
+    Route::prefix('blog-posts')->group(function () {
+        Route::get('/', [BlogPostController::class, 'index']);
+        Route::get('/{blogPost}', [BlogPostController::class, 'show']);
+        Route::post('/', [BlogPostController::class, 'store']);
+        Route::put('/{blogPost}', [BlogPostController::class, 'update']);
+        Route::delete('/{blogPost}', [BlogPostController::class, 'destroy']);
+    });
 });
 
 
