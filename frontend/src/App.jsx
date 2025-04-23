@@ -1,12 +1,7 @@
-import Home from "./pages/Home";
-import MainLayout from "./layouts/MainLayout";
+import AppRoutes from "./routes/AppRoutes";
 
-function App() {
-  return (
-    <MainLayout>
-      <Home />
-    </MainLayout>
-  );
-}
+const App = () => {
+  return <AppRoutes />;
+};
 
 export default App;
