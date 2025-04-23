@@ -20,7 +20,7 @@ const TaskList = ({ tasks, activeSection }) => {
   useEffect(() => {
     let result = [...tasks];
 
-    // For date comparisons in overdue case
+    // Define date comparison variable before switch statement
     const today = new Date();
 
     // Filter by section (navigation item ID)
@@ -105,7 +105,7 @@ const TaskList = ({ tasks, activeSection }) => {
       );
     }
 
-    // For priority sort comparisons
+    // Define priority values object before sort logic
     const priorityValues = { low: 1, medium: 2, high: 3, critical: 4 };
 
     // Sort tasks

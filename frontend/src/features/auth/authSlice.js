@@ -30,12 +30,22 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+// Initialization function to retrieve user from localStorage
+const getUserFromStorage = () => {
+  try {
+    const storedUser = localStorage.getItem("authUser");
+    return storedUser ? JSON.parse(storedUser) : null;
+  } catch (error) {
+    console.error("Failed to parse stored user:", error);
+    return null;
+  }
+};
 
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: null,
-    token: localStorage.getItem("token") || null,
+    user: getUserFromStorage(),
+    token: localStorage.getItem("authToken") || null,
     loading: false,
     error: null,
   },
@@ -43,7 +53,13 @@ const authSlice = createSlice({
     logout: (state) => {
       state.token = null;
       state.user = null;
-      localStorage.removeItem("token");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("authUser");
+    },
+    // Add a restore session action
+    restoreSession: (state, action) => {
+      state.token = action.payload.token;
+      state.user = action.payload.user;
     },
   },
   extraReducers: (builder) => {
@@ -56,7 +72,10 @@ const authSlice = createSlice({
         state.loading = false;
         state.token = action.payload.token;
         state.user = action.payload.user; 
-        localStorage.setItem("token", action.payload.token);
+        localStorage.setItem("authToken", action.payload.token);
+        if (action.payload.user) {
+          localStorage.setItem("authUser", JSON.stringify(action.payload.user));
+        }
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -65,5 +84,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, restoreSession } = authSlice.actions;
 export default authSlice.reducer;

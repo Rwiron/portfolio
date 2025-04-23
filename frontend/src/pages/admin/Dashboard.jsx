@@ -1,91 +1,80 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../../features/auth/authSlice";
+import { restoreSession } from "../../features/auth/authSlice";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { token, user } = useSelector((state) => state.auth);
-  const [stats, setStats] = useState({
+  const [_stats] = useState({
     totalPosts: 24,
     totalProjects: 16,
     totalComments: 128,
     recentVisits: 1243,
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   // Check if user is authenticated
   useEffect(() => {
-    if (!token) {
+    // Check localStorage first to prevent flicker on refresh
+    const storedToken = localStorage.getItem("authToken");
+    const storedUser = JSON.parse(localStorage.getItem("authUser"));
+
+    if (!token && !storedToken) {
       navigate("/login");
+    } else {
+      // If we have data in localStorage but not in Redux store,
+      // restore the session from localStorage
+      if (storedToken && !token) {
+        dispatch(restoreSession({ token: storedToken, user: storedUser }));
+      }
+      setIsLoading(false);
     }
-  }, [token, navigate]);
+  }, [token, navigate, dispatch]);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/login");
-  };
+  // Persist auth data to localStorage when available
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem("authToken", token);
+    }
+    if (user) {
+      localStorage.setItem("authUser", JSON.stringify(user));
+    }
+  }, [token, user]);
 
-  if (!token) {
+  if (!token && !localStorage.getItem("authToken")) {
     return null; // Prevent rendering dashboard if not authenticated
   }
 
-  return (
-    <div className="min-h-screen bg-[#052d43] text-white">
-      {/* Header */}
-      <header className="bg-[#071f33]/80 backdrop-blur-lg border-b border-blue-900/30 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded flex items-center justify-center text-white font-bold">
-                A
-              </div>
-              <h1 className="text-xl font-bold">Admin Dashboard</h1>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              {user && (
-                <div className="flex items-center space-x-3">
-                  <div className="hidden md:block text-right">
-                    <p className="text-sm font-medium">{user.name}</p>
-                    <p className="text-xs text-gray-400">{user.email}</p>
-                  </div>
-                  <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-semibold border border-blue-500/30">
-                    {user.name?.charAt(0) || "U"}
-                  </div>
-                </div>
-              )}
-
-              <button
-                onClick={handleLogout}
-                className="px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                  />
-                </svg>
-              </button>
-            </div>
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#052d43] text-white flex items-center justify-center">
+        <div className="p-4 bg-[#071f33]/60 backdrop-blur-lg rounded-xl border border-blue-900/30">
+          <div className="flex items-center space-x-3">
+            <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p>Loading dashboard...</p>
           </div>
         </div>
-      </header>
+      </div>
+    );
+  }
 
+  // Get user from localStorage if not in Redux state
+  const displayUser = user ||
+    JSON.parse(localStorage.getItem("authUser")) || {
+      name: "Admin",
+      email: "admin@example.com",
+    };
+
+  return (
+    <>
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="bg-[#071f33]/60 backdrop-blur-lg rounded-xl p-6 shadow-lg border border-blue-900/30 mb-8">
           <h2 className="text-2xl font-bold text-white mb-2">
-            Welcome back, {user?.name || "Admin"}!
+            Welcome back, {displayUser?.name || "Admin"}!
           </h2>
           <p className="text-gray-400">
             Here's what's happening with your portfolio today.
@@ -97,7 +86,7 @@ const Dashboard = () => {
           {[
             {
               title: "Blog Posts",
-              count: stats.totalPosts,
+              count: _stats.totalPosts,
               icon: (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -119,7 +108,7 @@ const Dashboard = () => {
             },
             {
               title: "Projects",
-              count: stats.totalProjects,
+              count: _stats.totalProjects,
               icon: (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -141,7 +130,7 @@ const Dashboard = () => {
             },
             {
               title: "Comments",
-              count: stats.totalComments,
+              count: _stats.totalComments,
               icon: (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -163,7 +152,7 @@ const Dashboard = () => {
             },
             {
               title: "Visits",
-              count: stats.recentVisits,
+              count: _stats.recentVisits,
               icon: (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -454,8 +443,8 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </>
   );
 };
 

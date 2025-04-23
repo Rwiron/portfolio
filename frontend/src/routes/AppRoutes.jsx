@@ -6,6 +6,11 @@ import Blog from "../pages/client/Blog";
 import Contact from "../pages/client/Contact";
 import Login from "../pages/admin/Login";
 import Dashboard from "../pages/admin/Dashboard";
+import PrivateRoute from "./PrivateRoute";
+import AdminCreateProject from "../pages/admin/AdminCreateProject";
+import AdminLayout from "../layouts/AdminLayout";
+import NotFound from "../pages/NotFound";
+import AdminSkills from "../pages/admin/AdminSkills";
 
 const AppRoutes = () => {
   return (
@@ -43,29 +48,38 @@ const AppRoutes = () => {
         }
       />
       <Route path="/login" element={<Login />} />
-      <Route path="/admin/dashboard" element={<Dashboard />} />
-
       <Route
-        path="*"
+        path="/admin/dashboard"
         element={
-          <MainLayout>
-            <div className="max-w-4xl mx-auto px-4 py-20 text-center">
-              <h1 className="text-4xl font-bold text-gray-800 mb-4">
-                404 - Page Not Found
-              </h1>
-              <p className="text-gray-600 mb-8">
-                The page you are looking for doesn't exist or has been moved.
-              </p>
-              <a
-                href="/"
-                className="inline-block bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700 transition"
-              >
-                Return to Home
-              </a>
-            </div>
-          </MainLayout>
+          <PrivateRoute>
+            <AdminLayout>
+              <Dashboard />
+            </AdminLayout>
+          </PrivateRoute>
         }
       />
+      <Route
+        path="/admin/create-project"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <AdminCreateProject />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/skills"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <AdminSkills />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
