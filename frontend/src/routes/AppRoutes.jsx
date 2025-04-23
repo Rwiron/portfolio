@@ -4,6 +4,9 @@ import Home from "../pages/client/Home";
 import Projects from "../pages/client/Projects"; // ✅ make sure this exists
 import Blog from "../pages/client/Blog";
 import Contact from "../pages/client/Contact";
+import Login from "../pages/admin/Login";
+import Dashboard from "../pages/admin/Dashboard";
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -39,6 +42,8 @@ const AppRoutes = () => {
           </MainLayout>
         }
       />
+      <Route path="/login" element={<Login />} />
+      <Route path="/admin/dashboard" element={<Dashboard />} />
 
       <Route
         path="*"
